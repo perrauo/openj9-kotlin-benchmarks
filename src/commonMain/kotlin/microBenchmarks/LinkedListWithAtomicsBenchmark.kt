@@ -91,16 +91,19 @@ class LinkedListWithAtomicsBenchmark {
         list = LinkedListOfBuffers(chunks[0])
     }
 
-    @Benchmark
-    tailrec fun ensureNext(): ChunkBuffer? {
-        var current = list.head
+    tailrec fun ensureNext(current: ChunkBuffer = list.head): ChunkBuffer? {
         return when (val next = current.next) {
             null -> null
             else -> {
                 list.tailRemaining = Random.nextInt().toLong() + 1
-                ensureNext()
+                ensureNext(next)
             }
         }
+    }
+
+    @Benchmark
+    fun benchmarkEnsureNext() {
+        ensureNext()
     }
 }
 

@@ -1,6 +1,0 @@
-[submodule "kotlinx-benchmark"]
-	path = kotlinx-benchmark
-	url = https://github.com/perrauo/kotlinx-benchmark.git
-[submodule "openj9-kotlinx-benchmark"]
-	path = openj9-kotlinx-benchmark
-	url = https://github.com/perrauo/openj9-kotlinx-benchmark.git
