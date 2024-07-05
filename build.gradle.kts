@@ -15,13 +15,14 @@ import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl
 buildscript {
     repositories {
         gradlePluginPortal()
+        mavenCentral()
         maven(uri("./kotlin-compiler"))
     }
 
     val kotlin_version: String by project
 
     dependencies {
-        classpath(files("./kotlinx-benchmarks/kotlinx-benchmark-plugin-0.5.0.jar"))
+        classpath("org.jetbrains.kotlinx:kotlinx-benchmark-runtime:0.4.11")
         classpath("com.squareup:kotlinpoet:1.3.0")
         classpath("org.jetbrains.kotlin:kotlin-compiler-embeddable:$kotlin_version")
     }
@@ -29,7 +30,9 @@ buildscript {
 
 plugins {
     kotlin("multiplatform")
+    kotlin("plugin.allopen") version "1.9.20"
     id("de.undercouch.download") version "5.5.0"
+    id("org.jetbrains.kotlinx.benchmark") version "0.4.11"
 }
 
 apply {
@@ -64,6 +67,13 @@ repositories {
 val distinguishAttribute = Attribute.of("kotlinx-benchmark-distinguishAttribute", String::class.java)
 
 kotlin {
+
+    jvmToolchain{
+        languageVersion.set(JavaLanguageVersion.of(21))
+        vendor.set(JvmVendorSpec.IBM)
+        implementation.set(JvmImplementation.J9)
+    }
+
     js(IR) {
         this as KotlinJsIrTarget
         //d8()
@@ -87,29 +97,41 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation(files("./kotlinx-benchmarks/kotlinx-benchmark-runtime-0.5.0.jar"))
+                api("org.jetbrains.kotlinx:kotlinx-benchmark-runtime:0.4.11")
+                implementation("org.jetbrains.kotlinx:kotlinx-benchmark-runtime:0.4.11")
             }
         }
 
         val wasmMain by getting {
             dependencies {
-                implementation(files("./kotlinx-benchmarks/kotlinx-benchmark-runtime-wasmjs-0.5.0.klib"))
+                api("org.jetbrains.kotlinx:kotlinx-benchmark-runtime:0.4.11")
+                implementation("org.jetbrains.kotlinx:kotlinx-benchmark-runtime:0.4.11")
             }
         }
 
         val wasmOptMain by getting {
             dependencies {
-                implementation(files("./kotlinx-benchmarks/kotlinx-benchmark-runtime-wasmjs-0.5.0.klib"))
+                api("org.jetbrains.kotlinx:kotlinx-benchmark-runtime:0.4.11")
+                implementation("org.jetbrains.kotlinx:kotlinx-benchmark-runtime:0.4.11")
                 kotlin.srcDirs("$rootDir/src/wasmMain")
             }
         }
 
         val jsMain by getting {
             dependencies {
-                implementation(files("./kotlinx-benchmarks/kotlinx-benchmark-runtime-jsir-0.5.0.klib"))
+                api("org.jetbrains.kotlinx:kotlinx-benchmark-runtime:0.4.11")
+                implementation("org.jetbrains.kotlinx:kotlinx-benchmark-runtime:0.4.11")
+                // implementation(files("./kotlinx-benchmarks/kotlinx-benchmark-runtime-jsir-0.5.0.klib"))
             }
         }
     }
+}
+
+val javaHome: String? = System.getenv("JAVA_HOME")
+if (javaHome != null) {
+    System.setProperty("org.gradle.java.home", javaHome)
+} else {
+    throw GradleException("JAVA_HOME environment variable is not set.")
 }
 
 val reportAllTargetsToTC = tasks.register("reportAllTargetsToTC")
