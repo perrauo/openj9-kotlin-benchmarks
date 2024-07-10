@@ -70,7 +70,7 @@ kotlin {
 
     jvmToolchain{
         languageVersion.set(JavaLanguageVersion.of(21))
-        vendor.set(JvmVendorSpec.IBM)
+        vendor.set(JvmVendorSpec.Oracle)
         implementation.set(JvmImplementation.J9)
     }
 
